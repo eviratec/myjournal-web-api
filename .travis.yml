@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+  - "7"
+
+env:
+  - DS_DB_HOST=localhost MYJOURNAL_DB_USER=travis MYJOURNAL_DB_PASS= MYJOURNAL_DB_NAME=myjournal MYJOURNAL_SERVER_NAME=localhost MYJOURNAL_SERVER_PROTOCOL=http
+
+services:
+  - mysql
+
+before_install:
+  - mysql -e 'CREATE DATABASE myjournal;'
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - cat src/sql/db.sql | mysql -h localhost -u travis myjournal
+  - cat src/sql/data/*.sql | mysql -h localhost -u travis myjournal
+
+script:
+  - npm test
+
+git:
+  depth: 10

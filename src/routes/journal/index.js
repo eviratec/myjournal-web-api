@@ -14,30 +14,23 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function addListRoutes (myjournal) {
+function addJournalRoutes (myjournal) {
   const api = myjournal.expressApp;
 
   let routes = [
 
-    // Create List
-    ["post", "/lists", require("./createList")],
+    // Create Journal
+    ["post", "/journals", require("./createJournal")],
 
-    // Delete List
-    ["delete", "/list/:listId", require("./deleteListById")],
+    // Delete Journal
+    ["delete", "/journal/:journalId", require("./deleteJournalById")],
 
-    // Fetch Lists
-    ["get", "/lists/all", require("./fetchAllLists")],
-    ["get", "/list/:listId", require("./fetchListById")],
-    ["get", "/list/:parentId/lists", require("./fetchListsByParentId")],
-    ["get", "/category/:categoryId/lists", require("./fetchListsByCatId")],
+    // Fetch Journals
+    ["get", "/journals/all", require("./fetchAllJournals")],
+    ["get", "/journal/:journalId", require("./fetchJournalById")],
 
-    // List Properties
-    ["get", "/list/:listId/details", require("./fetchListDetailsById")],
-
-    // Change list properties
-    ["put", "/list/:listId/title", require("./changeListTitleById")],
-    ["put", "/list/:listId/details", require("./changeListDetailsById")],
-    ["put", "/list/:listId/completed", require("./changeListCompletedById")],
+    // Change journal properties
+    ["put", "/journal/:journalId/name", require("./changeJournalNameById")],
 
   ];
 
@@ -50,4 +43,4 @@ function addListRoutes (myjournal) {
   });
 }
 
-module.exports = addListRoutes;
+module.exports = addJournalRoutes;

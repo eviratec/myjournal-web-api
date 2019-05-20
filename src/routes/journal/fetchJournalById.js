@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function deleteListById (myjournal) {
+function fetchJournalById (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,35 +22,27 @@ function deleteListById (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    let listId = req.params.listId;
+    let journalId = req.params.journalId;
     let userId = req.authUser.get("Id");
-    let listUri = `/list/${listId}`;
 
-    authz.verifyOwnership(listUri, userId)
-      .then(fetchList)
-      .then(setListDeletedNow)
-      .then(returnSuccess)
+    authz.verifyOwnership(req.path, userId)
+      .then(fetchJournal)
+      .then(sendResponse)
       .catch(onError);
 
-    function fetchList () {
-      return db.fetchListById(listId);
+    function fetchJournal () {
+      return db.fetchJournalById(journalId);
     }
 
-    function setListDeletedNow (list) {
-      return list.save({
-        Deleted: Math.floor(Date.now()/1000),
-      });
+    function sendResponse (journal) {
+      res.status(200).send(journal);
     }
 
-    function returnSuccess () {
-      res.status(200).send();
-    }
-
-    function onError () {
-      res.status(400).send();
+    function onError (err) {
+      res.sendStatus(404);
     }
   }
 
 }
 
-module.exports = deleteListById;
+module.exports = fetchJournalById;

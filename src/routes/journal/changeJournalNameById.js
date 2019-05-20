@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function fetchListsByParentId (myjournal) {
+function changeJournalNameById (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,28 +22,35 @@ function fetchListsByParentId (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    let parentId = req.params.parentId;
+    let journalId = req.params.journalId;
     let userId = req.authUser.get("Id");
-    let parentListUri = `/list/${parentId}`;
+    let journalUri = `/journal/${journalId}`;
 
-    authz.verifyOwnership(parentListUri, userId)
-      .then(fetchListsByParentId)
-      .then(returnLists)
+    authz.verifyOwnership(journalUri, userId)
+      .then(fetchJournal)
+      .then(changeJournalName)
+      .then(returnSuccess)
       .catch(onError);
 
-    function fetchListsByParentId () {
-      return db.fetchListsByParentId(parentId);
+    function fetchJournal () {
+      return db.fetchJournalById(journalId);
     }
 
-    function returnLists (lists) {
-      res.status(200).send(lists);
+    function changeJournalName (journal) {
+      return journal.save({
+        Name: req.body.newValue || 'My Journal',
+      });
     }
 
-    function onError (err) {
-      res.status(500).send({ ErrorMsg: err.message });
+    function returnSuccess () {
+      res.status(200).send();
+    }
+
+    function onError () {
+      res.status(400).send();
     }
   }
 
 }
 
-module.exports = fetchListsByParentId;
+module.exports = changeJournalNameById;

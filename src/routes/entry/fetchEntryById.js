@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function changeListDetailsById (myjournal) {
+function fetchEntryById (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,9 +22,28 @@ function changeListDetailsById (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    res.status(200).send();
+    let entryId = req.params.entryId;
+    let userId = req.authUser.get("Id");
+
+    authz.verifyOwnership(req.path, userId)
+      .then(fetchEntry)
+      .then(sendResponse)
+      .catch(onError);
+
+    function fetchEntry () {
+      return db.fetchEntryById(entryId);
+    }
+
+    function sendResponse (category) {
+      res.status(200).send(category);
+    }
+
+    function onError (err) {
+      console.log(err.stack);
+      res.sendStatus(404);
+    }
   }
 
 }
 
-module.exports = changeListDetailsById;
+module.exports = fetchEntryById;

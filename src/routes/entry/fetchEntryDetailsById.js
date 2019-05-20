@@ -14,33 +14,17 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function addCategoryRoutes (myjournal) {
+function fetchEntryDetailsById (myjournal) {
+
   const api = myjournal.expressApp;
+  const db = myjournal.db;
+  const events = myjournal.events;
+  const authz = myjournal.authz;
 
-  let routes = [
+  return function (req, res) {
+    res.status(200).send();
+  }
 
-    // Create List
-    ["post", "/categories", require("./createCategory")],
-
-    // Delete List
-    ["delete", "/category/:categoryId", require("./deleteCategoryById")],
-
-    // Fetch Lists
-    ["get", "/categories/all", require("./fetchAllCategories")],
-    ["get", "/category/:categoryId", require("./fetchCategoryById")],
-
-    // Change list properties
-    ["put", "/category/:categoryId/name", require("./changeCategoryNameById")],
-
-  ];
-
-  routes.forEach(route => {
-    let method = route[0];
-    let uri = route[1];
-    let fn = route[2];
-
-    api[method](uri, api.requireAuth, fn(myjournal));
-  });
 }
 
-module.exports = addCategoryRoutes;
+module.exports = fetchEntryDetailsById;

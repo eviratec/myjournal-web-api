@@ -17,8 +17,8 @@
 module.exports = function (myjournal) {
 
   const ROUTE_DEFINERS = [
-    "category",
-    "list",
+    "journal",
+    "entry",
     "user",
   ];
 

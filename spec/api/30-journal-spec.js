@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-describe("CATEGORY REST API", function () {
+describe("JOURNAL REST API", function () {
 
   let api;
 
@@ -47,27 +47,27 @@ describe("CATEGORY REST API", function () {
     api.server.close(done);
   });
 
-  describe("/categories", function () {
+  describe("/journals", function () {
 
     let d;
 
     beforeEach(function () {
       d = {
-        Name: "My Test Category",
+        Name: "My Test Journal",
       };
     });
 
-    describe("createCategory <POST> with valid parameters", function () {
+    describe("createJournal <POST> with valid parameters", function () {
 
       it("RETURNS `HTTP/1.1 403 Forbidden` WHEN `Authorization` HEADER IS NOT PROVIDED", function (done) {
-        $testClient.$post(null, `/categories`, d, function (err, res) {
+        $testClient.$post(null, `/journals`, d, function (err, res) {
           expect(res.statusCode).toBe(403);
           done();
         });
       });
 
       it("RETURNS `HTTP/1.1 200 OK` WHEN `Authorization` HEADER IS PROVIDED", function (done) {
-        $testClient.$post(authorization, `/categories`, d, function (err, res) {
+        $testClient.$post(authorization, `/journals`, d, function (err, res) {
           expect(res.statusCode).toBe(200);
           done();
         });
@@ -78,7 +78,7 @@ describe("CATEGORY REST API", function () {
         describe("response body", function () {
 
           it("is an object", function (done) {
-            $testClient.$post(authorization, `/categories`, d, function (err, res) {
+            $testClient.$post(authorization, `/journals`, d, function (err, res) {
               expect(res.statusCode).toBe(200);
               expect(res.d).toEqual(jasmine.any(Object));
               done();
@@ -86,10 +86,10 @@ describe("CATEGORY REST API", function () {
           });
 
           it("has the correct value for property 'Name'", function (done) {
-            $testClient.$post(authorization, `/categories`, d, function (err, res) {
+            $testClient.$post(authorization, `/journals`, d, function (err, res) {
               expect(res.statusCode).toBe(200);
               expect(res.d).toEqual(jasmine.objectContaining({
-                Name: "My Test Category",
+                Name: "My Test Journal",
               }));
               done();
             });
@@ -98,15 +98,15 @@ describe("CATEGORY REST API", function () {
         });
 
         describe("subsequent requests", function () {
-          describe("to /categories/all", function () {
-            it("should include the newly created category", function (done) {
-              $testClient.$post(authorization, `/categories`, d, function (err, res) {
+          describe("to /journals/all", function () {
+            it("should include the newly created journal", function (done) {
+              $testClient.$post(authorization, `/journals`, d, function (err, res) {
                 let Id = res.d.Id;
-                $testClient.$get(authorization, `/categories/all`, function (err, res) {
+                $testClient.$get(authorization, `/journals/all`, function (err, res) {
                   expect(res.d).toEqual(jasmine.arrayContaining([
                     jasmine.objectContaining({
                       Id: Id,
-                      Name: "My Test Category",
+                      Name: "My Test Journal",
                     }),
                   ]));
                   done();
@@ -122,19 +122,19 @@ describe("CATEGORY REST API", function () {
 
   });
 
-  describe("/categories/all", function () {
+  describe("/journals/all", function () {
 
     describe("fetchAllCategories <GET>", function () {
 
       it("RETURNS `HTTP/1.1 403 Forbidden` WHEN `Authorization` HEADER IS NOT PROVIDED", function (done) {
-        $testClient.$get(null, `/categories/all`, function (err, res) {
+        $testClient.$get(null, `/journals/all`, function (err, res) {
           expect(res.statusCode).toBe(403);
           done();
         });
       });
 
       it("RETURNS `HTTP/1.1 200 OK` WITH AN ARRAY WHEN `Authorization` HEADER IS PROVIDED", function (done) {
-        $testClient.$get(authorization, `/categories/all`, function (err, res) {
+        $testClient.$get(authorization, `/journals/all`, function (err, res) {
           expect(res.statusCode).toBe(200);
           expect(Array.isArray(res.d)).toBe(true);
           done();
@@ -145,32 +145,32 @@ describe("CATEGORY REST API", function () {
 
   });
 
-  describe("/category/:categoryId", function () {
+  describe("/journal/:journalId", function () {
 
-    let categoryData;
-    let category;
-    let categoryId;
+    let journalData;
+    let journal;
+    let journalId;
 
     beforeEach(function (done) {
-      categoryData = {
-        Name: "My Test Category",
+      journalData = {
+        Name: "My Test Journal",
       };
-      $testClient.$post(authorization, `/categories`, categoryData, function (err, res) {
-        category = res.d;
-        categoryId = category.Id;
+      $testClient.$post(authorization, `/journals`, journalData, function (err, res) {
+        journal = res.d;
+        journalId = journal.Id;
         done();
       });
     });
 
-    describe("updating category properties", function () {
+    describe("updating journal properties", function () {
 
       describe("changing the value for the 'Name' property", function () {
 
         it("RETURNS `HTTP/1.1 200 OK`", function (done) {
           let data = {
-            newValue: "New Category Name",
+            newValue: "New Journal Name",
           };
-          $testClient.$put(authorization, `/category/${categoryId}/name`, data, function (err, res) {
+          $testClient.$put(authorization, `/journal/${journalId}/name`, data, function (err, res) {
             expect(res.statusCode).toBe(200);
             done();
           });
@@ -178,11 +178,11 @@ describe("CATEGORY REST API", function () {
 
         it("UPDATES THE VALUE CORRECTLY", function (done) {
           let data = {
-            newValue: "New Category Name",
+            newValue: "New Journal Name",
           };
-          $testClient.$put(authorization, `/category/${categoryId}/name`, data, function (err, res) {
-            $testClient.$get(authorization, `/category/${categoryId}`, function (err, res) {
-              expect(res.d.Name).toBe("New Category Name");
+          $testClient.$put(authorization, `/journal/${journalId}/name`, data, function (err, res) {
+            $testClient.$get(authorization, `/journal/${journalId}`, function (err, res) {
+              expect(res.d.Name).toBe("New Journal Name");
               done();
             });
           });
@@ -192,10 +192,10 @@ describe("CATEGORY REST API", function () {
 
     });
 
-    describe("deleting categories", function () {
+    describe("deleting journals", function () {
 
       it("RETURNS `HTTP/1.1 403 Forbidden` WHEN `Authorization` HEADER IS NOT PROVIDED", function (done) {
-        $testClient.$delete(null, `/category/${categoryId}`, function (err, res) {
+        $testClient.$delete(null, `/journal/${journalId}`, function (err, res) {
           expect(res.statusCode).toBe(403);
           done();
         });
@@ -206,21 +206,21 @@ describe("CATEGORY REST API", function () {
         describe("successful request", function () {
 
           it("RETURNS `HTTP/1.1 200 OK` WHEN `Authorization` HEADER IS PROVIDED", function (done) {
-            $testClient.$delete(authorization, `/category/${categoryId}`, function (err, res) {
+            $testClient.$delete(authorization, `/journal/${journalId}`, function (err, res) {
               expect(res.statusCode).toBe(200);
               done();
             });
           });
 
           describe("subsequent requests", function () {
-            describe("to /categories/all", function () {
-              it("should not include the deleted category", function (done) {
-                $testClient.$delete(authorization, `/category/${categoryId}`, function (err, res) {
-                  $testClient.$get(authorization, `/categories/all`, function (err, res) {
+            describe("to /journals/all", function () {
+              it("should not include the deleted journal", function (done) {
+                $testClient.$delete(authorization, `/journal/${journalId}`, function (err, res) {
+                  $testClient.$get(authorization, `/journals/all`, function (err, res) {
                     expect(res.d).not.toEqual(jasmine.arrayContaining([
                       jasmine.objectContaining({
-                        Id: categoryId,
-                        Name: "My Test Category",
+                        Id: journalId,
+                        Name: "My Test Journal",
                       }),
                     ]));
                     done();

@@ -19,8 +19,8 @@ module.exports = function () {
   const DBS = [
 
     // ??? Domain
-    "Category",
-    "List",
+    "Journal",
+    "Entry",
 
     // User Domain
     "Auth",

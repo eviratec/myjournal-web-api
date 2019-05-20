@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function fetchAllCategories (myjournal) {
+function changeEntrySummaryById (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,21 +22,35 @@ function fetchAllCategories (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    let ownerId = req.authUser.get("Id");
-    
-    db.fetchCategoriesByOwnerId(ownerId)
-      .then(returnCategories)
+    let entryId = req.params.entryId;
+    let userId = req.authUser.get("Id");
+    let entryUri = `/entry/${entryId}`;
+
+    authz.verifyOwnership(entryUri, userId)
+      .then(fetchEntry)
+      .then(changeEntryTitle)
+      .then(returnSuccess)
       .catch(onError);
 
-    function returnCategories (categories) {
-      res.status(200).send(categories);
+    function fetchEntry () {
+      return db.fetchEntryById(entryId);
     }
 
-    function onError (err) {
-      res.status(500).send({ ErrorMsg: err.message });
+    function changeEntryTitle (entry) {
+      return entry.save({
+        Summary: req.body.newValue || 'New Entry...',
+      });
+    }
+
+    function returnSuccess () {
+      res.status(200).send();
+    }
+
+    function onError () {
+      res.status(400).send();
     }
   }
 
 }
 
-module.exports = fetchAllCategories;
+module.exports = changeEntrySummaryById;

@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function fetchListDetailsById (myjournal) {
+function fetchEntriesByCatId (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,9 +22,28 @@ function fetchListDetailsById (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    res.status(200).send();
+    let journalId = req.params.journalId;
+    let userId = req.authUser.get("Id");
+    let journalUri = `/journal/${journalId}`;
+
+    authz.verifyOwnership(journalUri, userId)
+      .then(fetchEntriesByJournalId)
+      .then(returnEntries)
+      .catch(onError);
+
+    function fetchEntriesByJournalId () {
+      return db.fetchEntriesByJournalId(journalId);
+    }
+
+    function returnEntries (entries) {
+      res.status(200).send(entries);
+    }
+
+    function onError (err) {
+      res.status(500).send({ ErrorMsg: err.message });
+    }
   }
 
 }
 
-module.exports = fetchListDetailsById;
+module.exports = fetchEntriesByCatId;

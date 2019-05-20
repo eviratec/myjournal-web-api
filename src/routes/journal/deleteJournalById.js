@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function changeListCompletedById (myjournal) {
+function deleteJournalById (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,42 +22,24 @@ function changeListCompletedById (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    let listId = req.params.listId;
+    let journalId = req.params.journalId;
     let userId = req.authUser.get("Id");
-    let listUri = `/list/${listId}`;
+    let journalUri = `/journal/${journalId}`;
 
-    authz.verifyOwnership(listUri, userId)
-      .then(fetchList)
-      .then(changeListCompleted)
+    authz.verifyOwnership(journalUri, userId)
+      .then(fetchJournal)
+      .then(setJournalDeletedNow)
       .then(returnSuccess)
       .catch(onError);
 
-    function fetchList () {
-      return db.fetchListById(listId);
+    function fetchJournal () {
+      return db.fetchJournalById(journalId);
     }
 
-    function changeListCompleted (list) {
-      if ("now" === req.body.newValue) {
-        return setListCompletedNow();
-      }
-
-      if (null === req.body.newValue) {
-        return clearListCompleted();
-      }
-
-      return setListCompletedNow();
-
-      function setListCompletedNow () {
-        return list.save({
-          Completed: Math.floor(Date.now()/1000),
-        });
-      }
-
-      function clearListCompleted () {
-        return list.save({
-          Completed: null,
-        });
-      }
+    function setJournalDeletedNow (journal) {
+      return journal.save({
+        Deleted: Math.floor(Date.now()/1000),
+      });
     }
 
     function returnSuccess () {
@@ -71,4 +53,4 @@ function changeListCompletedById (myjournal) {
 
 }
 
-module.exports = changeListCompletedById;
+module.exports = deleteJournalById;

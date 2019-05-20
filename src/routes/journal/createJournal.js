@@ -16,32 +16,32 @@
 
 const v4uuid = require("uuid/v4");
 
-function createCategory (myjournal) {
+function createJournal (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
   const events = myjournal.events;
   const authz = myjournal.authz;
 
-  const Category = db.Category;
+  const Journal = db.Journal;
 
   return function (req, res) {
-    let categoryId = v4uuid();
-    let category = Category.forge({
-      Id: categoryId,
+    let journalId = v4uuid();
+    let journal = Journal.forge({
+      Id: journalId,
       OwnerId: req.authUser.get("Id"),
-      Name: req.body.Name || "New Category",
+      Name: req.body.Name || "New Journal",
       Created: Math.floor(Date.now()/1000),
     });
 
-    category.save(null, {method: "insert"})
+    journal.save(null, {method: "insert"})
       .then(onCreateSuccess)
       .catch(onError);
 
-    function onCreateSuccess (category) {
-      let uri = `/category/${categoryId}`;
+    function onCreateSuccess (journal) {
+      let uri = `/journal/${journalId}`;
       events.emit("resource:created", uri, req.authUser.get("Id"));
-      res.returnNewObject(category);
+      res.returnNewObject(journal);
     }
 
     function onError (err) {
@@ -51,4 +51,4 @@ function createCategory (myjournal) {
 
 }
 
-module.exports = createCategory;
+module.exports = createJournal;

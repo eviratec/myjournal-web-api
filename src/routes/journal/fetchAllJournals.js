@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function fetchAllLists (myjournal) {
+function fetchAllJournals (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -24,12 +24,12 @@ function fetchAllLists (myjournal) {
   return function (req, res) {
     let ownerId = req.authUser.get("Id");
 
-    db.fetchListsByOwnerId(ownerId)
-      .then(returnLists)
+    db.fetchJournalsByOwnerId(ownerId)
+      .then(returnJournals)
       .catch(onError);
 
-    function returnLists (lists) {
-      res.status(200).send(lists);
+    function returnJournals (journals) {
+      res.status(200).send(journals);
     }
 
     function onError (err) {
@@ -39,4 +39,4 @@ function fetchAllLists (myjournal) {
 
 }
 
-module.exports = fetchAllLists;
+module.exports = fetchAllJournals;

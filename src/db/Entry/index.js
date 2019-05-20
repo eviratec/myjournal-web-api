@@ -14,11 +14,11 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-module.exports = function ListDb (db) {
+module.exports = function EntryDb (db) {
   const bookshelf = db._bookshelf;
 
-  const List = bookshelf.Model.extend({
-    tableName: "lists",
+  const Entry = bookshelf.Model.extend({
+    tableName: "entries",
     idAttribute: "Id",
     constructor: function() {
       bookshelf.Model.apply(this, arguments);
@@ -29,47 +29,31 @@ module.exports = function ListDb (db) {
     User: function() {
       return this.belongsTo(db.User, "OwnerId", "Id");
     },
-    ParentList: function() {
-      return this.belongsTo(db.List, "ParentId", "Id");
-    },
-    Category: function() {
-      return this.belongsTo(db.Category, "CategoryId", "Id");
-    },
-    Lists: function() {
-      return this.hasMany(db.List, "ParentId")
-        .query(function(qb) {
-          qb.whereNull('Deleted');
-        });
+    Journal: function() {
+      return this.belongsTo(db.Journal, "JournalId", "Id");
     },
   });
 
-  db.List = List;
+  db.Entry = Entry;
 
-  function fetchListById (id) {
-    return List.where({"Id": id, "Deleted": null})
-      .fetch({withRelated: ["User", "ParentList", "Category", "Lists"]});
+  function fetchEntryById (id) {
+    return Entry.where({"Id": id, "Deleted": null})
+      .fetch({withRelated: ["User", "Journal"]});
   }
 
-  db.fetchListById = fetchListById;
+  db.fetchEntryById = fetchEntryById;
 
-  function fetchListsByOwnerId (userId) {
-    return List.where({"OwnerId": userId, "Deleted": null})
+  function fetchEntriesByOwnerId (userId) {
+    return Entry.where({"OwnerId": userId, "Deleted": null})
       .fetchAll();
   }
 
-  db.fetchListsByOwnerId = fetchListsByOwnerId;
+  db.fetchEntriesByOwnerId = fetchEntriesByOwnerId;
 
-  function fetchListsByParentId (parentId) {
-    return List.where({"ParentId": parentId, "Deleted": null})
+  function fetchEntriesByJournalId (categoryId) {
+    return Entry.where({"JournalId": categoryId, "Deleted": null})
       .fetchAll();
   }
 
-  db.fetchListsByParentId = fetchListsByParentId;
-
-  function fetchListsByCategoryId (categoryId) {
-    return List.where({"CategoryId": categoryId, "Deleted": null})
-      .fetchAll();
-  }
-
-  db.fetchListsByCategoryId = fetchListsByCategoryId;
+  db.fetchEntriesByJournalId = fetchEntriesByJournalId;
 }

@@ -14,11 +14,11 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-module.exports = function CategoryDb (db) {
+module.exports = function JournalDb (db) {
   const bookshelf = db._bookshelf;
 
-  const Category = bookshelf.Model.extend({
-    tableName: "categories",
+  const Journal = bookshelf.Model.extend({
+    tableName: "journals",
     idAttribute: "Id",
     constructor: function() {
       bookshelf.Model.apply(this, arguments);
@@ -29,27 +29,27 @@ module.exports = function CategoryDb (db) {
     User: function() {
       return this.belongsTo(db.User, "OwnerId", "Id");
     },
-    Lists: function() {
-      return this.hasMany(db.List, "CategoryId")
+    Entries: function() {
+      return this.hasMany(db.Entry, "JournalId")
         .query(function(qb) {
           qb.whereNull('Deleted');
         });
     },
   });
 
-  db.Category = Category;
+  db.Journal = Journal;
 
-  function fetchCategoryById (id) {
-    return Category.where({"Id": id, "Deleted": null})
-      .fetch({withRelated: ["User", "Lists"]});
+  function fetchJournalById (id) {
+    return Journal.where({"Id": id, "Deleted": null})
+      .fetch({withRelated: ["User", "Entries"]});
   }
 
-  db.fetchCategoryById = fetchCategoryById;
+  db.fetchJournalById = fetchJournalById;
 
-  function fetchCategoriesByOwnerId (userId) {
-    return Category.where({"OwnerId": userId, "Deleted": null})
+  function fetchJournalsByOwnerId (userId) {
+    return Journal.where({"OwnerId": userId, "Deleted": null})
       .fetchAll();
   }
 
-  db.fetchCategoriesByOwnerId = fetchCategoriesByOwnerId;
+  db.fetchJournalsByOwnerId = fetchJournalsByOwnerId;
 }

@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function fetchCategoryById (myjournal) {
+function deleteEntryById (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,27 +22,35 @@ function fetchCategoryById (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    let categoryId = req.params.categoryId;
+    let entryId = req.params.entryId;
     let userId = req.authUser.get("Id");
+    let entryUri = `/entry/${entryId}`;
 
-    authz.verifyOwnership(req.path, userId)
-      .then(fetchCategory)
-      .then(sendResponse)
+    authz.verifyOwnership(entryUri, userId)
+      .then(fetchEntry)
+      .then(setEntryDeletedNow)
+      .then(returnSuccess)
       .catch(onError);
 
-    function fetchCategory () {
-      return db.fetchCategoryById(categoryId);
+    function fetchEntry () {
+      return db.fetchEntryById(entryId);
     }
 
-    function sendResponse (category) {
-      res.status(200).send(category);
+    function setEntryDeletedNow (entry) {
+      return entry.save({
+        Deleted: Math.floor(Date.now()/1000),
+      });
     }
 
-    function onError (err) {
-      res.sendStatus(404);
+    function returnSuccess () {
+      res.status(200).send();
+    }
+
+    function onError () {
+      res.status(400).send();
     }
   }
 
 }
 
-module.exports = fetchCategoryById;
+module.exports = deleteEntryById;

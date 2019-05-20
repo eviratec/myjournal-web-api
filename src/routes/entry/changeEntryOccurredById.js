@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-function changeListTitleById (myjournal) {
+function changeEntryOccurredById (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
@@ -22,24 +22,48 @@ function changeListTitleById (myjournal) {
   const authz = myjournal.authz;
 
   return function (req, res) {
-    let listId = req.params.listId;
+    let entryId = req.params.entryId;
     let userId = req.authUser.get("Id");
-    let listUri = `/list/${listId}`;
+    let entryUri = `/entry/${entryId}`;
 
-    authz.verifyOwnership(listUri, userId)
-      .then(fetchList)
-      .then(changeListTitle)
+    authz.verifyOwnership(entryUri, userId)
+      .then(fetchEntry)
+      .then(changeEntryOccurred)
       .then(returnSuccess)
       .catch(onError);
 
-    function fetchList () {
-      return db.fetchListById(listId);
+    function fetchEntry () {
+      return db.fetchEntryById(entryId);
     }
 
-    function changeListTitle (list) {
-      return list.save({
-        Title: req.body.newValue || 'My List',
-      });
+    function changeEntryOccurred (entry) {
+      if ("now" === req.body.newValue) {
+        return setEntryOccurredNow();
+      }
+
+      if (null === req.body.newValue) {
+        return clearEntryOccurred();
+      }
+
+      if ('number' === typeof req.body.newValue) {
+        return entry.save({
+          Occurred: req.body.newValue,
+        });
+      }
+
+      return clearEntryOccurred();
+
+      function setEntryOccurredNow () {
+        return entry.save({
+          Occurred: Math.floor(Date.now()/1000),
+        });
+      }
+
+      function clearEntryOccurred () {
+        return entry.save({
+          Occurred: null,
+        });
+      }
     }
 
     function returnSuccess () {
@@ -53,4 +77,4 @@ function changeListTitleById (myjournal) {
 
 }
 
-module.exports = changeListTitleById;
+module.exports = changeEntryOccurredById;

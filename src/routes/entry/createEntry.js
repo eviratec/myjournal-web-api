@@ -16,34 +16,44 @@
 
 const v4uuid = require("uuid/v4");
 
-function createList (myjournal) {
+function createEntry (myjournal) {
 
   const api = myjournal.expressApp;
   const db = myjournal.db;
   const events = myjournal.events;
   const authz = myjournal.authz;
 
-  const List = db.List;
+  const Entry = db.Entry;
 
   return function (req, res) {
-    let listId = v4uuid();
-    let list = List.forge({
-      Id: listId,
+    let now = Math.floor(Date.now()/1000);
+    let occurred = req.body.Occurred;
+    let entryId = v4uuid();
+    let entry;
+
+    occurred = 'number' === typeof occurred && occurred || now;
+
+    entry = Entry.forge({
+      Id: entryId,
       OwnerId: req.authUser.get("Id"),
-      ParentId: req.body.ParentId || null,
-      CategoryId: req.body.CategoryId || null,
-      Title: req.body.Title || "New List",
-      Created: Math.floor(Date.now()/1000),
+      JournalId: req.body.JournalId || null,
+      Summary: req.body.Summary || "New Entry...",
+      Occurred: occurred,
+      Created: now,
     });
 
-    list.save(null, {method: "insert"})
+    /**
+     * @todo Check OwnerId has permission to add Entries to JournalId
+     */
+
+    entry.save(null, {method: "insert"})
       .then(onCreateSuccess)
       .catch(onError);
 
-    function onCreateSuccess (list) {
-      let uri = `/list/${listId}`;
+    function onCreateSuccess (entry) {
+      let uri = `/entry/${entryId}`;
       events.emit("resource:created", uri, req.authUser.get("Id"));
-      res.returnNewObject(list);
+      res.returnNewObject(entry);
     }
 
     function onError (err) {
@@ -53,4 +63,4 @@ function createList (myjournal) {
 
 }
 
-module.exports = createList;
+module.exports = createEntry;

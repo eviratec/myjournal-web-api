@@ -1,4 +1,4 @@
-CREATE TABLE `categories` (
+CREATE TABLE `journals` (
   `Id` varchar(36) NOT NULL,
   `OwnerId` varchar(36) NOT NULL,
   `Name` varchar(45) NOT NULL,
